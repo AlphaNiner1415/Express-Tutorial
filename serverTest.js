@@ -36,9 +36,9 @@ const Announcement = sequelize.define('announcement', { //Date is handled by seq
 // force: true is Force syncing will destroy all previous data and insert in new data.
 //This means you run this only once to initialize the database and comment it out after that.
 
-Announcement.sync({force: true}).then(() => {
-  console.log("Announcement table created.")
-  });
+// Announcement.sync({force: true}).then(() => {
+//   console.log("Announcement table created.")
+//   });
 
 
 //app.use means we're going to use whatever's inside the parentheses.
@@ -93,28 +93,40 @@ app.get('/all-announcement', (req, res) => {
   })
 })
 
+app.get('/findid', (req, res) =>{
+  //let entered = req.params.entered
+  Announcement.findAll({ attributes:['id', 'title', 'body' ], where: {'id': 1 } }).then(result => {
+    console.log(result)
+
+    res.json({ status : "success!" , result})
+    // res.json({ status : "Success!" , data: a })
+  }).catch(e => {
+    res.json({status: "Error."})
+  })
+});
+
 app.get('/:page', (req, res) => {
   let limit = 10;   // number of records per page
   let offset = 0;
-  db.Announcement.findAndCountAll()
+  Announcement.findAndCountAll()
   .then((data) => {
     let page = req.params.page;      // page number
     let pages = Math.ceil(data.count / limit);
-		offset = limit * (page - 1);
-    db.Announcement.findAll({
+		offset = (limit * (page - 1)) || 0;
+    Announcement.findAll({
       attributes: ['id', 'title','body' ],
       limit: limit,
       offset: offset,
-      $sort: { id: 1 }
-    })
-    .then((Announcement) => {
-      res.status(200).json({'result': Announcement, 'count': data.count, 'pages': pages});
+      $sort: { 'id' : 1 }
+    }).then((a) => {
+      res.status(200).json({'result': a, 'count': data.count, 'pages': pages, 'page': page});
     });
-  })
-  .catch(function (error) {
+  }).catch(function (error) {
 		res.status(500).send('Internal Server Error');
-	});
+	})
 });
+
+
 
 
 app.listen(port, () => console.log(`Your website is ready to go baby!! On port ${port}!`))
