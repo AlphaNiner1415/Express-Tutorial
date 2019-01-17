@@ -106,7 +106,7 @@ app.get('/findid', (req, res) =>{
 });
 
 app.get('/:page', (req, res) => {
-  let limit = 5;   // number of records per page
+  let limit = 10;   // number of records per page
   let offset = 0;
   Announcement.findAndCountAll()
   .then((data) => {
